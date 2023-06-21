@@ -58,7 +58,7 @@ public:
 
   void cambiarEspVida(double f)
   {
-    espVida += f;
+    this->espVida += f;
   }
 
   void mutacion(float p, float q)
@@ -116,10 +116,10 @@ int main()
       nido[i].resize(20);
     }
 
-    for (int i = 0; i < 80; i++)
+    for (int i = 0; i < 40; i++)
     {
       int r = rand() % 20, s = rand() % 20;
-      nido[r][s].comida = 7; // Ponemos 5 piezas de fruta en 40 casillas aleatorias
+      nido[r][s].comida = 5; // Ponemos 5 piezas de fruta en 40 casillas aleatorias
     }
 
     vector<BumbleBee> poblacion; // Creamos la colonia de abejorros
@@ -207,8 +207,7 @@ int main()
       // Mappeo de valores (mejor, mejor/2) -> (100, 0)
       // El abejorro con el mejor coste tendrá 100 generaciones disponibles de lifespan
       // El peor tendrá 0
-      //int lifespan = (poblacion[j].getCoste() - (mejores[0].getCoste()-1000)) * 100 / (mejores[0].getCoste() - (mejores[0].getCoste()-1000));
-      double lifespan = 1;
+      int lifespan = (mejores[0].getCoste() / poblacion[j].getCoste()) * 100;
       if (lifespan < 0)
         lifespan = 0;
 
@@ -221,7 +220,6 @@ int main()
     int evals = poblacion.size();
     bool extincion = false;
     int contador = 0;
-    cout << "funciones " << funcid << endl;
 
     while (evals < 10000 * dim && !extincion)
     {
@@ -230,25 +228,22 @@ int main()
       //  Y POR TANTO BORRAR TODOS LOS QUE "MUERAN"
       int k = 0;
       bool continuar = true;
-      cout << "a " << poblacion.size() << endl;
       while (continuar)
       {
-        poblacion[k].cambiarEspVida(-1);
+        poblacion[k].setLifeSpan(poblacion[k].getLifeSpan()-1);
 
-        if (k = poblacion.size())
-          break;
-
+        if (k = poblacion.size()){
+          continuar = false;
+        }
         if (poblacion[k].getLifeSpan() <= 0)
         {
           poblacion.erase(poblacion.begin() + k);
-          cout << "ha muerto una abeja " << endl;
           k--;
         }
         k++;
       }
-      int eval40 = (10000 * dim - poblacion.size()) / poblacion.size() / 40;
       // CADA 40 GENERACIONES GENERAREMOS UN NUEVO ABEJORRO A PARTIR DE LAS MEJORES SOLUCIONES
-      if (contador % eval40 == 1) //
+      if (contador % 40 == 0) //
       {
         int r, s;
         int indice_aleatorio = rand() % 5;
@@ -310,7 +305,7 @@ int main()
       {
         poblacion[i].setCoste(cec17_fitness(&poblacion[i].getBumblebee()[0])); // Asignamos fitness
       }
-      evals += poblacion.size();
+      evals += poblacion.size()+1;
 
       // POR ÚLTIMO DEBEMOS ACTUALIZAR TODAS LAS SOLUCIONES MEJORES
       for (int j = 0; j < poblacion.size(); j++)
@@ -357,6 +352,7 @@ int main()
         cout << "SE HAN EXTINGUIDO LOS ABEJORROS EN LA GENERACION " << contador << endl;
       }
     }
+    contador = 0;
 
     cout << "Best BB[F" << funcid << "]: " << scientific << cec17_error(mejores[0].getCoste()) << endl;
   }
